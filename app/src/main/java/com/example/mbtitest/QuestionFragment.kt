@@ -13,7 +13,10 @@ import androidx.fragment.app.Fragment
 
 class QuestionFragment : Fragment() {
 
+    //질문 타입을 저장하는 변수
     private var questionType: Int = 0
+
+    // 질문 제목 리스트
     private val questionTile = listOf(
         R.string.question1_title,
         R.string.question2_title,
@@ -21,6 +24,7 @@ class QuestionFragment : Fragment() {
         R.string.question4_title
     )
 
+    // 각 질문에 대한 텍스트 리스트
     private val questionTexts = listOf(
         listOf(R.string.question1_1, R.string.question1_2, R.string.question1_3),
         listOf(R.string.question2_1, R.string.question2_2, R.string.question2_3),
@@ -28,6 +32,7 @@ class QuestionFragment : Fragment() {
         listOf(R.string.question4_1, R.string.question4_2, R.string.question4_3)
     )
 
+    // 각 질문의 답변 리스트
     private val questionAnswers = listOf(
         listOf(
             listOf(R.string.question1_1_answer1, R.string.question1_1_answer2),
@@ -52,6 +57,7 @@ class QuestionFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // arguments에서 questionType 값을 가져옴
         arguments?.let {
             questionType = it.getInt(ARG_QUESTION_TYPE)
         }
@@ -62,11 +68,14 @@ class QuestionFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_question, container,false)
+        // Fragment의 레이아웃을 inflater를 통해 설정
+        val view = inflater.inflate(R.layout.fragment_question, container, false)
 
+        // 질문 제목 설정
         val title: TextView = view.findViewById(R.id.tv_question_title)
         title.text = getString(questionTile[questionType])
 
+        // 각 질문 텍스트뷰와 라디오 그룹을 리스트로 설정
         val questionTextView = listOf<TextView>(
             view.findViewById(R.id.tv_question_1),
             view.findViewById(R.id.tv_question_2),
@@ -78,8 +87,8 @@ class QuestionFragment : Fragment() {
             view.findViewById(R.id.rg_answer_2),
             view.findViewById(R.id.rg_answer_3)
         )
-
-        for (i in questionTextView.indices){
+        // 각 질문과 답변 설정
+        for (i in questionTextView.indices) {
             questionTextView[i].text = getString(questionTexts[questionType][i])
 
             val radioButton1 = answerRadioGroup[i].getChildAt(0) as RadioButton
@@ -94,27 +103,28 @@ class QuestionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 각 라디오 그룹과 버튼을 설정
         val anserRadioGroup = listOf<RadioGroup>(
             view.findViewById(R.id.rg_answer_1),
             view.findViewById(R.id.rg_answer_2),
             view.findViewById(R.id.rg_answer_3)
         )
-        val btn_next : Button = view.findViewById(R.id.btn_next)
+        val btn_next: Button = view.findViewById(R.id.btn_next)
 
         btn_next.setOnClickListener {
+            // 모든 질문이 답변되었는지 확인
+            val isAllAnswered = anserRadioGroup.all { it.checkedRadioButtonId != -1 }
 
-            val isAllAnswered = anserRadioGroup.all{it.checkedRadioButtonId != -1}
-
-            if(isAllAnswered) {
-
+            if (isAllAnswered) {
+                // 각 질문에 대한 응답을 저장
                 val responses = anserRadioGroup.map { radioGroup ->
                     val firstRadioButton = radioGroup.getChildAt(0) as RadioButton
-                    if(firstRadioButton.isChecked) 1 else 2
+                    if (firstRadioButton.isChecked) 1 else 2
                 }
                 (activity as? TestActivity)?.questionnaireResults?.addResponses(responses)
                 (activity as? TestActivity)?.moveToNextQuestion()
-            }else{
-                Toast.makeText(context,"모든 질문에 답해주세요.",Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "모든 질문에 답해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -122,6 +132,7 @@ class QuestionFragment : Fragment() {
     companion object {
         private const val ARG_QUESTION_TYPE = "questionType"
 
+        // QuestionFragment 인스턴스를 생성하는 메소드
         fun newInstance(questionType: Int): QuestionFragment {
             val fragment = QuestionFragment()
             val args = Bundle()
